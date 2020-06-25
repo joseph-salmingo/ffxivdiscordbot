@@ -2,6 +2,7 @@ use serenity::client::Client;
 use serenity::model::channel::Message;
 use serenity::prelude::{EventHandler, Context};
 use serenity::framework::standard::{
+        Args,
         StandardFramework,
         CommandResult,
         macros::{
@@ -55,12 +56,15 @@ fn hello_world(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-fn fyc(ctx: &mut Context, msg: &Message) -> CommandResult {
+fn fyc(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
 
     if let Err(why) = msg.channel_id.send_message(&ctx.http, |m| {
+        
+        let target_user: String = args.single().expect("missing arg");
         m.add_file(AttachmentType::Path(Path::new("fyc.jpg")));
         m.embed(|e |  {
             e.title("Fuck yo' couch!");
+            e.description(format!("Hey {}...", target_user));
             e.image("attachment://fyc.jpg");
             e
         });
