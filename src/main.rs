@@ -9,11 +9,13 @@ use serenity::framework::standard::{
             group
         }
 };
+use serenity::http::AttachmentType;
+
 #[group]
-#[commands(hello_world)]
+#[commands(hello_world, fyc)]
 struct General;
 
-use std::env;
+use std::{env, path::Path};
 use std::io;
 use std::io::prelude::*;
 use std::fs::File;
@@ -25,10 +27,10 @@ impl EventHandler for Handler {}
 
 fn main() {
    
-    let mut token = get_token().expect("Error getting token");
+    let token = get_token().expect("Error getting token");
     let mut client = Client::new(token, Handler).expect("Error creating client");
     client.with_framework(StandardFramework::new()
-        .configure(|c| c.prefix("~"))
+        .configure(|c| c.prefix("!"))
         .group(&GENERAL_GROUP));
 
     if let Err(why) = client.start() {
@@ -48,6 +50,24 @@ fn get_token() -> io::Result<String> {
 #[command]
 fn hello_world(ctx: &mut Context, msg: &Message) -> CommandResult {
     msg.reply(ctx, "Hello World!")?;
+
+    Ok(())
+}
+
+#[command]
+fn fyc(ctx: &mut Context, msg: &Message) -> CommandResult {
+
+    if let Err(why) = msg.channel_id.send_message(&ctx.http, |m| {
+        m.add_file(AttachmentType::Path(Path::new("fyc.jpg")));
+        m.embed(|e |  {
+            e.title("Fuck yo' couch!");
+            e.image("attachment://fyc.jpg");
+            e
+        });
+        m
+    }) {
+        println!("Error sending embed: {}", why);
+    }
 
     Ok(())
 }
