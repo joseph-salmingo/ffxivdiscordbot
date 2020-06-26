@@ -50,6 +50,8 @@ fn get_token() -> io::Result<String> {
 
 #[command]
 fn hello_world(ctx: &mut Context, msg: &Message) -> CommandResult {
+
+    // Replies to the command "!hello_world" with a generic "Hello World!"
     msg.reply(ctx, "Hello World!")?;
 
     Ok(())
@@ -57,14 +59,24 @@ fn hello_world(ctx: &mut Context, msg: &Message) -> CommandResult {
 
 #[command]
 fn fyc(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
-
+    
+    // Replies to the command "!fyc" with the following:
+    // If a name is provided, adds a description to the embedded text to include the name. 
+    // Otherwise, no description is used in the embedded message.
+    // It then posts the Rick James Chapelle show image of him saying "Fuck yo' couch!"
+    
     if let Err(why) = msg.channel_id.send_message(&ctx.http, |m| {
         
-        let target_user: String = args.single().expect("missing arg");
+        let mut description_text = String::new();
+        let arg_user = args.single::<String>();
+        match arg_user {
+            Ok(cmd_name) => description_text = format!("Hey {}...", cmd_name),
+            _ => ()
+        }
         m.add_file(AttachmentType::Path(Path::new("fyc.jpg")));
         m.embed(|e |  {
             e.title("Fuck yo' couch!");
-            e.description(format!("Hey {}...", target_user));
+            e.description(description_text);
             e.image("attachment://fyc.jpg");
             e
         });
