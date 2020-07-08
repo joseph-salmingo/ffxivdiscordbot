@@ -33,6 +33,12 @@ fn main() {
     let mut client = Client::new(token, Handler).expect("Error creating client");
     client.with_framework(StandardFramework::new()
         .configure(|c| c.prefix("!"))
+        .before(|ctx, msg, command_name| {
+            println!("Got command '{}' by user '{}'",
+            command_name,
+            msg.author.name);
+            true
+        })
         .group(&GENERAL_GROUP));
 
     if let Err(why) = client.start() {
@@ -103,9 +109,13 @@ fn iam(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let char_data = chardata::get_character_info(char_id);
 
-    if let Err(why) = ctx.http.edit_nickname(*msg.guild_id.unwrap().as_u64(), Some(character_name)) {
-        println!("There was an error: {}", why);
+    if let Some(guild) = msg.guild(&ctx.cache) {
+        if let Err(why) = guild.read().edit_member(&ctx,  &msg.author.id, |m| m.nickname(character_name)) {
+            println!("There was an error changing nickname: {}", why);
+        }
     }
+
+    println!("Changed {}'s name to {}.", msg.author.name, character_name);
 
     Ok(())
     
