@@ -33,7 +33,7 @@ struct ProfileInformation {
  }
 
 #[derive(Deserialize, Debug, PartialEq, Default)]
- struct CharacterProfileInformation {
+pub struct CharacterProfileInformation {
 
     #[serde(rename = "Avatar")]
     avatar: String,
@@ -48,7 +48,7 @@ struct ProfileInformation {
  }
 
 #[tokio::main]
-async fn get_character_id(name: &str, server: &str) -> Result<u64, Box<dyn error::Error>> {
+pub async fn get_character_id(name: &str, server: &str) -> Result<u64, Box<dyn error::Error>> {
     // Sends a request to the xiv lodestone API given the name and the server. 
     // The character ID is expected and if exactly one result is not given then it returns an error.
 
@@ -72,7 +72,7 @@ async fn get_character_id(name: &str, server: &str) -> Result<u64, Box<dyn error
 }
 
 #[tokio::main]
-async fn get_character_info(character_id: u64) -> Result<CharacterProfileInformation, Box<dyn error::Error>> {
+pub async fn get_character_info(character_id: u64) -> Result<CharacterProfileInformation, Box<dyn error::Error>> {
     let api_key = get_api_key().expect("Problem getting key");
     let request_url = format!("https://xivapi.com/character/{character_id}",
                                         character_id = character_id

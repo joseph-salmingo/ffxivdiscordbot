@@ -1,3 +1,4 @@
+mod chardata;
 use serenity::client::Client;
 use serenity::model::channel::Message;
 use serenity::prelude::{EventHandler, Context};
@@ -13,7 +14,7 @@ use serenity::framework::standard::{
 use serenity::http::AttachmentType;
 
 #[group]
-#[commands(hello_world, fyc)]
+#[commands(hello_world, fyc, iam)]
 struct General;
 
 use std::{env, path::Path};
@@ -35,7 +36,7 @@ fn main() {
         .group(&GENERAL_GROUP));
 
     if let Err(why) = client.start() {
-        println!("An error occured while running the client: {:?}", why);
+        println!("An error occurred while running the client: {:?}", why);
         }
 }
 
@@ -87,3 +88,27 @@ fn fyc(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
 
     Ok(())
 }
+
+#[command]
+fn iam(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
+
+    // Replies to the command !iam by renaming nickname and assigning role based on datacenter 
+    // using data from the Lodestone API. 
+    
+
+    let data_center = args.single::<String>().unwrap();
+    let character_name = args.rest();
+
+    let char_id = chardata::get_character_id(character_name, &data_center).unwrap();
+
+    let char_data = chardata::get_character_info(char_id);
+
+    if let Err(why) = ctx.http.edit_nickname(*msg.guild_id.unwrap().as_u64(), Some(character_name)) {
+        println!("There was an error: {}", why);
+    }
+
+    Ok(())
+    
+}
+
+
